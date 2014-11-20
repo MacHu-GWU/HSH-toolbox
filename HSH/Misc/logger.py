@@ -81,4 +81,4 @@ class Log(object):
         with open(os.path.join(self.directory, self.fname), "a") as f:
             f.write(line)
         if enable_verbose:
-            print("%s%s" % ("\t"*indent, message) ) # print log info
+            print("%s%s" % ("\t" * indent, message) ) # print log info

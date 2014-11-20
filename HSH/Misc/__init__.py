@@ -9,3 +9,6 @@
 #    o_(")(")                    #
 #                                #
 ##################################
+
+from .logger import Log
+from .logicflow import tryit

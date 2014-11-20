@@ -115,8 +115,4 @@ def find_bigfile(path, threshold = 0):
     else:
         raise Exception("it is not a directory!")
     
-if __name__ == "__main__":
-    print(get_dirinfo(r"C:\HSH\Workspace\py27_projects\HSH-toolbox"))
-#     find_bigdir(r"C:\HSH\Workspace\py27_projects\HSH-toolbox", 10000)
-#     find_bigfile(r"C:\HSH\Workspace\py27_projects\HSH-toolbox", 10000)
     

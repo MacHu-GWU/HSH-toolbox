@@ -27,7 +27,7 @@ import pandas as pd
 import sqlite3
 import os
 
-def xlsx_to_sqlite(excel_name):
+def excel2sqlite(excel_name):
     """创建一个与excel文件同名的
     只支持xlsx2013以上的版本
     """

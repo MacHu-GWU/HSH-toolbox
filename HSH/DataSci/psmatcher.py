@@ -65,16 +65,15 @@ for whether the individual has a high school degree (1=no degree, 0=degree). "re
 dollars.
 
 Import:
-    from HSH.DataSci.psmatcher import psm
+    from HSH.DataSci.psmatcher import psm, stratified_matching, index_matching
+os:
+    from HSH.DataSci import psmatcher
 """
 
 from __future__ import print_function
-try:
-    from .knn_classifier import dist, knn_find, prep_standardize
-    from .built_in_dtypes import OrderedSet
-except:
-    from knn_classifier import dist, knn_find, prep_standardize
-    from built_in_dtypes import OrderedSet
+from .knn import dist, knn_find
+from .preprocess import prep_standardize
+from ..Data.dtype import OrderedSet
 import pandas as pd, numpy as np
 
 def stratified_matching(control, treatment, stratified_col = None):
@@ -225,45 +224,4 @@ def psm(control, treatment, use_col = None, stratified_col = None, k = 1):
                                                                          k = k)
     
     return control[selected_control_index], control[selected_for_each_treatment]
-    
-if __name__ == "__main__":
-    np.set_printoptions(precision=2)
-    def psm_UT1():
-        
-        
-        data = pd.read_csv(r"demo_data\re78.csv", index_col=0) # read all data
-        control, treatment = (data[data["treat"] == 0], # split to control and treatment
-                              data[data["treat"] == 1])
-        
-        psm_control, psm_treatment = (control.loc[:, "treat":"married"].values, # select the columns
-                                      treatment.loc[:, "treat":"married"].values) # you want to use. number column only
-                
-        indices = stratified_matching(psm_control, psm_treatment, stratified_col = [[1],[3],[0,2,4],[5]])
-        selected_control_index, selected_for_each_treatment = index_matching(indices, k = 1)
-        
-        for i, j in zip(psm_treatment, selected_for_each_treatment):
-            print("===============")
-            print(i, type(i))
-            print(psm_control[j])
 
-#     psm_UT1()
-    
-    def psm_UT2():
-        """a recipe for how to use PSM matching"""
-        
-        data = pd.read_csv(r"demo_data\re78.csv", index_col=0) # read all data
-        control, treatment = (data[data["treat"] == 0].values, # split to control and treatment
-                              data[data["treat"] == 1].values)
-        
-        selected_control, selected_control_foreach = psm(control, treatment, 
-                                                         use_col = [0, 1, 2, 3, 4, 5], 
-                                                         stratified_col = [[1],[3],[0,2,4],[5]], k = 1)
-        
-        print(treatment)
-        for tr, ct in zip(treatment, selected_control_foreach):
-            print("==============")
-            print(tr, type(tr))
-            print("------")
-            print(ct)
-
-#     psm_UT2()
