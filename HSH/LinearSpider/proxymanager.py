@@ -35,18 +35,31 @@ class ProxyManager(object):
         每次使用代理，如果成功，则成功次数和尝试次数+1
         每次使用代理，如果失败，则成功次数和尝试次数+1
         健康度在尝试次数小于5次时都是1.0，如果尝试次数多于五次，则健康度 = 成功次数/尝试次数
-        
     
+    代理管理器主要有如下几个功能：
+        1. 从健康度较高的代理中随机选取一个代理使用
+        2. 根据上一次代理使用的
     """
-    def __init__(self):
+    def __init__(self, maximum_num_of_proxy = 10):
+        self.maximum_num_of_proxy = 10
         self._equip_proxy()
         self.current_proxy = None
+        self.file_path = "proxy.txt"
         
     def __str__(self):
         return str(self.proxy)
     
-    def _equip_proxy(self, maximum_num_of_proxy = 10):
-        """load latest availble proxy from www.us-proxy.org
+    def _equip_proxy(self):
+        """
+        [EN]load latest availble proxy from www.us-proxy.org
+        There are 3 levels of proxies according to their anonymity.
+        Level 1 - Elite Proxy / Highly Anonymous Proxy: The web server can't detect whether you are using a proxy.
+        Level 2 - Anonymous Proxy: The web server can know you are using a proxy, but it can't know your real IP.
+        Level 3 - Transparent Proxy: The web server can know you are using a proxy and it can also know your real IP.
+        
+        [CN]从www.us-proxy.org上抓取我们需要的代理
+        在=== EDIT THE FOLLOWING RULES CAN FILTER THE PROXY YOU WANT 一行下可以修改规则，确定你所需要的
+        代理。默认只使用Elite proxy
         """
         ### get www.us-proxy.org homepage html
         user_agents = ["Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
@@ -71,15 +84,25 @@ class ProxyManager(object):
         for tr in table.tbody.find_all("tr"):
             ip, port, code, country, anonymity, google, https, last_check = [td.text for td in tr.find_all("td")]
             ### === EDIT THE FOLLOWING RULES CAN FILTER THE PROXY YOU WANT 
-            if anonymity == "elite proxy":
+            if anonymity == "elite proxy": # default only use elite proxy
                 ips.append("http://%s:%s" % (ip, port))
                 res.append([0.0, 0.0, 1.0])
-                if len(res) >= maximum_num_of_proxy: # if got enough useful proxy, then step out
+                if len(res) >= self.maximum_num_of_proxy: # if got enough useful proxy, then step out
                     break
         
         self.proxy = pd.DataFrame(res, index = ips, columns = ["success", "tried", "health"])
         
-    def generateone(self):
+    def dump_pxy(self):
+        """dump currently using proxy data to local file in descent order by health"""
+        self.proxy.sort("health", ascending=0).to_csv(self.file_path, sep="\t", header = True, index = True)
+    
+    def load_pxy(self):
+        """load proxy data from local file and merge with current using proxy"""
+        df = pd.read_csv(self.file_path, sep="\t", header = 0, index_col = 0)
+        for row_ind, row in df.iterrows():
+            self.proxy.loc[row_ind, :] = row
+
+    def generate_one(self):
         """randomly choose a proxy with health greater than 0.75
         """
         health_proxy = self.proxy[self.proxy["health"] >= 0.75].index

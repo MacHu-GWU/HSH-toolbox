@@ -14,10 +14,26 @@ class ProxyManager_unittest():
         print(pm)
     
     @staticmethod
-    def generateone():
+    def dump_pxy():
+        print("{:=^100}".format("dump_pxy"))
+        pm = ProxyManager()
+        pm.dump_pxy()
+        
+    @staticmethod
+    def load_pxy():
+        print("{:=^100}".format("load_pxy"))
+        pm = ProxyManager()
+        print("{:=^60}".format("before"))
+        print(pm)
+        pm.load_pxy()
+        print("{:=^60}".format("after"))
+        print(pm)
+        
+    @staticmethod
+    def generate_one():
         pm = ProxyManager()
         pm._equip_proxy()
-        print(pm.generateone()) # sample proxies = {"http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080",}
+        print(pm.generate_one()) # sample proxies = {"http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080",}
         print(pm.current_proxy) # see if proxy manager saved the most recent proxy to self.current_proxy
     
     @staticmethod
@@ -29,7 +45,7 @@ class ProxyManager_unittest():
         except Exception as e:
             print(e)
             
-        print(pm.generateone())
+        print(pm.generate_one())
         pm.update_health(1)
         print(pm)
 
@@ -77,12 +93,15 @@ class Crawler_unittest():
         
 if __name__ == "__main__":
 #     ProxyManager_unittest._equip_proxy()
-#     ProxyManager_unittest.generateone()
+#     ProxyManager_unittest.dump_pxy()
+#     ProxyManager_unittest.load_pxy()
+#     ProxyManager_unittest.generate_one()
 #     ProxyManager_unittest.update_health()
 
 #     Crawler_unittest.set_referer()
 #     Crawler_unittest.enable_proxy()
 #     Crawler_unittest.html_WITHOUt_proxy()
 #     Crawler_unittest.html_WITH_proxy()
+
     
     print("COMPLETE")
