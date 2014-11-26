@@ -1,8 +1,7 @@
 ##encoding=utf8
 
 from __future__ import print_function
-from HSH.LinearSpider.proxymanager import ProxyManager
-from HSH.LinearSpider.crawler import Crawler
+from HSH.LinearSpider.crawler import Crawler, ProxyManager
 from bs4 import BeautifulSoup as BS4
 
 

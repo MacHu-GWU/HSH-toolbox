@@ -36,25 +36,41 @@ if is_py2:
 else:
     read_mode, write_mode = "r", "w"
     
-def load_js(fname):
+def load_js(fname, enable_verbose = True):
     """load dict object from file"""
-    print("\nLoading from %s..." % fname)
-    st = time.clock()
+    if enable_verbose:
+        print("\nLoading from %s..." % fname)
+        st = time.clock()
+        
     if os.path.exists(fname): # exists, then load
         js = json.load(open(fname, read_mode) )
-        print("\tComplete! Elapse %s sec." % (time.clock() - st) )
+        if enable_verbose:
+            print("\tComplete! Elapse %s sec." % (time.clock() - st) )
         return js
+    
     else:
-        print("\t%s not exists! cannot load! Create an empty dict instead" % fname)
+        if enable_verbose:
+            print("\t%s not exists! cannot load! Create an empty dict instead" % fname)
         return dict()
 
-def dump_js(js, fname, fastmode = False, replace = False):
+def dump_js(js, fname, fastmode = False, replace = False, enable_verbose = True):
     """dump dict object to file.
-    dump without pretty indent can be faster when fastmode = True
-    Replace existing file when replace = True"""        
-    print("\nDumping to %s..." % fname)
+    [Args]
+    ------
+    fname: save as file name
     
-    st = time.clock()
+    fastmode: boolean, default False
+        if True, then dumping json without sorting keys and pretty indent. It is faster
+    
+    replace: boolean, default False
+        if True, when you dumping json to a existing file, it silently overwrite it.
+        Default False setting is to prevent overwrite file by mistake
+        
+    enable_verbose: boolean, default True. Triggle for message
+    """
+    if enable_verbose:
+        print("\nDumping to %s..." % fname)
+        st = time.clock()
     
     if os.path.exists(fname): # if exists, check replace option
         if replace: # replace existing file
@@ -63,15 +79,19 @@ def dump_js(js, fname, fastmode = False, replace = False):
             else:
                 json.dump(js, open(fname, write_mode), sort_keys=True, indent=4,separators=("," , ": ") )
         else: # stop, print error message
-            print("\tCANNOT WRITE to %s, it's already exists" % fname)
+            raise Exception("\tCANNOT WRITE to %s, it's already exists" % fname)
+                
+    
     else: # if not exists, just write to it
         if fastmode: # no sort and indent, do the fastest dumping
             json.dump(js, open(fname, write_mode))
         else:
             json.dump(js, open(fname, write_mode), sort_keys=True, indent=4,separators=("," , ": ") )
             
-    print("\tComplete! Elapse %s sec" % (time.clock() - st) )
+    if enable_verbose:
+        print("\tComplete! Elapse %s sec" % (time.clock() - st) )
+    
 
 def prt_js(js):
-    """pretty print dict object"""
-    print(json.dumps(js, sort_keys=True,indent=4,separators=("," , ": ")) )
+    """print dict object with pretty format"""
+    print(json.dumps(js, sort_keys=True, indent=4, separators=("," , ": ")) )

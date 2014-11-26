@@ -18,11 +18,12 @@ This module is re-pack of some pickle utility functions
 compatible: python2 and python3
 
 import:
-    from HSH.Data.pk import load_pk, dump_pk
+    from HSH.Data.pk import load_pk, dump_pk, obj2str, str2obj
 """
 
 from __future__ import print_function
 import pickle
+import base64
 import sys
 import os
 import time
@@ -33,27 +34,52 @@ if is_py2:
 else:
     pk_protocol = 3
 
-def load_pk(fname):
+def load_pk(fname, enable_verbose = True):
     """load object from pickle file"""
-    print("\nLoading from %s..." % fname)
-    st = time.clock()
+    if enable_verbose:
+        print("\nLoading from %s..." % fname)
+        st = time.clock()
     obj = pickle.load(open(fname, "rb"))
-    print("\tComplete! Elapse %s sec." % (time.clock() - st) )
+    if enable_verbose:
+        print("\tComplete! Elapse %s sec." % (time.clock() - st) )
     return obj
 
-def dump_pk(obj, fname, pickle_protocol = pk_protocol, replace = False):
+def dump_pk(obj, fname, pickle_protocol = pk_protocol, replace = False, enable_verbose = True):
     """dump object to pickle file
-    pickle_protocol = 2 can write to python2 readable pickle file, but slower
-    Replace existing file when replace = True"""
-    print("\nDumping to %s..." % fname)
+    [Args]
+    ------
+    fname: save as file name
     
-    st = time.clock()
+    pickle_protocol: pickle protocol version. 
+        For PY2, default is 2, for PY3, default is 3. But if you want create 2&3 compatible pickle,
+        use 2, but slower.
+        
+    replace: boolean, default False
+        if True, when you dumping json to a existing file, it silently overwrite it.
+        Default False setting is to prevent overwrite file by mistake
+        
+    enable_verbose: boolean, default True. Triggle for message
+    """
+    if enable_verbose:
+        print("\nDumping to %s..." % fname)
+        st = time.clock()
     
     if os.path.exists(fname): # if exists, check replace option
         if replace: # replace existing file
             pickle.dump(obj, open(fname, "wb"), protocol = pickle_protocol)
         else: # stop, print error message
-            print("\tCANNOT WRITE to %s, it's already exists" % fname)
+            raise Exception("\tCANNOT WRITE to %s, it's already exists" % fname)
     else: # if not exists, just write to it
         pickle.dump(obj, open(fname, "wb"), protocol = pickle_protocol)
-    print("\tComplete! Elapse %s sec" % (time.clock() - st) )
+        
+    if enable_verbose:
+        print("\tComplete! Elapse %s sec" % (time.clock() - st) )
+        
+def obj2str(obj, pickle_protocol = pk_protocol):
+    """convert arbitrary object to database friendly string, using base64encode algorithm"""
+    return base64.b64encode(pickle.dumps(obj, protocol = pickle_protocol))
+
+def str2obj(textstr):
+    """recovery object from base64 encoded string"""
+    return pickle.loads(base64.b64decode(textstr))
+    

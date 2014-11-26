@@ -20,6 +20,12 @@ class Js_unittest():
         dump_js(data, "data.json", replace = True)  # 测试 dump_js
         print ( load_js("data.json") )              # 测试 load_js
         prt_js(data)                                # 测试 prt_js
+        
+        try:
+            dump_js(data, "data.json")
+        except Exception as e:
+            print(e)
+                
         os.remove("data.json")                      # 清除掉残留文件
       
         
@@ -33,9 +39,29 @@ class Pk_unittest():
         obj = {1: ["a1", "a2"], 2: ["b1", "b2"]}    # 初始化数据
         dump_pk(obj, "obj.p", 2, replace = True)    # 测试 dump_pk
         print(load_pk("obj.p") )                    # 测试 load_pk
-        os.remove("obj.p")                          # 清除掉残留文件
         
+        try:
+            dump_pk(obj, "obj.p", 2) 
+        except Exception as e:
+            print(e)
+            
+        os.remove("obj.p")                          # 清除掉残留文件
+    
+    @staticmethod
+    def pk_vs_database():
+        import sqlite3
+        
+        conn = sqlite3.connect(":memory:")
+        c = conn.cursor()
+        c.execute("CREATE TABLE test (name TEXT) ")
+        c.execute("INSERT INTO test VALUES (?)", 
+                  (obj2str({1:"a", 2:"你好"}),))
+        
+        print(c.execute("select * from test").fetchone()) # see what stored in database
+        print(str2obj(c.execute("select * from test").fetchone()[0])) # recovery object from text str
+
 if __name__ == "__main__":
-    Excel2db_unittest.excel2sqlite()
-    Js_unittest.everything()
-    Pk_unittest.everything()
+#     Excel2db_unittest.excel2sqlite()
+#     Js_unittest.everything()
+#     Pk_unittest.everything()
+    Pk_unittest.pk_vs_database()
