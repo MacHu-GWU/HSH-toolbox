@@ -32,8 +32,9 @@ class ProxyManager_unittest():
     def generate_one():
         pm = ProxyManager()
         pm._equip_proxy()
-        print(pm.generate_one()) # sample proxies = {"http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080",}
-        print(pm.current_proxy) # see if proxy manager saved the most recent proxy to self.current_proxy
+        for i in range(10):
+            print(pm.generate_one()) # sample proxies = {"http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080",}
+            print(pm.current_proxy) # see if proxy manager saved the most recent proxy to self.current_proxy
     
     @staticmethod
     def update_health():
@@ -79,7 +80,7 @@ class Crawler_unittest():
         url = "http://docs.python-requests.org/"
         spider = Crawler()
         spider.enable_proxy()
-        for i in range(100):
+        for i in range(10):
             html = spider.html(url)
             print(i, spider.pm.current_proxy)
             if html:
@@ -97,10 +98,10 @@ if __name__ == "__main__":
 #     ProxyManager_unittest.generate_one()
 #     ProxyManager_unittest.update_health()
 
-#     Crawler_unittest.set_referer()
-#     Crawler_unittest.enable_proxy()
-#     Crawler_unittest.html_WITHOUt_proxy()
-#     Crawler_unittest.html_WITH_proxy()
+    Crawler_unittest.set_referer()
+    Crawler_unittest.enable_proxy()
+    Crawler_unittest.html_WITHOUt_proxy()
+    Crawler_unittest.html_WITH_proxy()
 
     
     print("COMPLETE")

@@ -16,7 +16,7 @@ Repack of requests
 
 from __future__ import print_function
 from bs4 import BeautifulSoup as BS4
-import pandas
+import pandas as pd
 import requests
 import random
 import itertools
@@ -219,7 +219,7 @@ class ProxyManager(object):
         2. 根据上一次代理使用的
     """
     def __init__(self, maximum_num_of_proxy = 10):
-        self.maximum_num_of_proxy = 10
+        self.maximum_num_of_proxy = maximum_num_of_proxy
         self._equip_proxy()
         self.current_proxy = None
         self.file_path = "proxy.txt"
@@ -264,11 +264,14 @@ class ProxyManager(object):
         """dump currently using proxy data to local file in descent order by health"""
         self.proxy.sort("health", ascending=0).to_csv(self.file_path, sep="\t", header = True, index = True)
     
-    def load_pxy(self):
+    def load_pxy(self, replace = False):
         """load proxy data from local file and merge with current using proxy"""
         df = pd.read_csv(self.file_path, sep="\t", header = 0, index_col = 0)
-        for row_ind, row in df.iterrows():
-            self.proxy.loc[row_ind, :] = row
+        if replace: # if in replace mode, dump current, overwrite with loaded
+            self.proxy = df
+        else: # if not in replace mode, merge current and loaded
+            for row_ind, row in df.iterrows():
+                self.proxy.loc[row_ind, :] = row
 
     def generate_one(self):
         """randomly choose a proxy with health greater than 0.75
@@ -295,21 +298,3 @@ class ProxyManager(object):
             if self.proxy.loc[ip, "tried"] >= 5: # if tried more than 10 times, then we keep update successful rate
                 self.proxy.loc[ip, "health"] = float(self.proxy.loc[ip, "success"])/self.proxy.loc[ip, "tried"]
                 
-def ignore_iterkeys(dictionary, ignore = ["ref"]): # data 在线性爬虫中用于默认储存task.todo的传递信息，详情见Readme.MD
-    """iter dict keys, ignore the key in the "ignore" list"""
-    for key in dictionary:
-        if key not in ignore:
-            yield key
-
-def ignore_itervalues(dictionary, ignore = ["ref"]):
-    """iter dict keys, ignore the key in the "ignore" list"""
-    for key in dictionary:
-        if key not in ignore:
-            yield dictionary[key]
-            
-def ignore_iteritems(dictionary, ignore = ["ref"]):
-    """iter dict keys, ignore the key in the "ignore" list"""
-    for key in dictionary:
-        if key not in ignore:
-            yield key, dictionary[key]
-            

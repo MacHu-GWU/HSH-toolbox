@@ -28,7 +28,13 @@ class Js_unittest():
                 
         os.remove("data.json")                      # 清除掉残留文件
       
-        
+    @staticmethod
+    def safe_dump_js():
+        data = {i:"a" for i in range(1000000)}
+        fname = "data.json"
+        dump_js(data, fname, replace = True)        # 首先尝试dump
+#         safe_dump_js(data, fname)                   # 然后以同样的文件名dump，看看会不会出现临时文件
+    
 class Pk_unittest():
     @staticmethod
     def everything():
@@ -46,7 +52,14 @@ class Pk_unittest():
             print(e)
             
         os.remove("obj.p")                          # 清除掉残留文件
-    
+
+    @staticmethod
+    def safe_dump_pk():
+        data = {i:"a" for i in range(1000000)}
+        fname = "data.p"
+        dump_pk(data, fname, replace = True)        # 首先尝试dump
+#         safe_dump_pk(data, fname)                   # 然后以同样的文件名dump，看看会不会出现临时文件
+
     @staticmethod
     def pk_vs_database():
         import sqlite3
@@ -63,5 +76,7 @@ class Pk_unittest():
 if __name__ == "__main__":
 #     Excel2db_unittest.excel2sqlite()
 #     Js_unittest.everything()
+    Js_unittest.safe_dump_js()
 #     Pk_unittest.everything()
-    Pk_unittest.pk_vs_database()
+    Pk_unittest.safe_dump_pk()
+#     Pk_unittest.pk_vs_database()
