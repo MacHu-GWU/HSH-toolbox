@@ -11,11 +11,18 @@
 ##################################
 
 """
+A Linear Link Extractor Scheduler automatically handle:
 
+    1. link extract from level1, level2,...
+    2. Auto detect with url has been crawled and never do repetitive job.
+    
 """
+
 from __future__ import print_function
 from .crawler import Crawler
-from .nodetree import Node
+from .dicttree import DictTree as DT
+from .js import load_js, dump_js, safe_dump_js, prt_js
+from .pk import load_pk, dump_pk, safe_dump_pk
 from .logicflow import tryit
 from .logger import Log
 import itertools
@@ -25,7 +32,7 @@ class Scheduler(object):
         if help:
             helpinfo = \
             """
-            
+            ToDo...
             """
             print(helpinfo)
         self.entrance_url = entrance_url
@@ -80,9 +87,9 @@ class Scheduler(object):
         """
         self.link_extractor_list = link_extractor_list
 
-    def _update_node(self, node, link_extractor):
-        for url, info in link_extractor(node.key, self.spider):
-            node.ac(url, **info)
+    def _update_node(self, key, node, link_extractor):
+        for url, info in link_extractor(key, self.spider):
+            DT.add_children(node, url, **info)
 
     def start(self):
         """
@@ -91,30 +98,33 @@ class Scheduler(object):
         子节点数，只有在等于0的时候，我们才发送http请求，尝试解析网页
         """
         try:
-            self.sitemap = Node.load(self.local_file)
+            self.sitemap = load_pk(self.local_file)
         except:
-            self.sitemap = Node(key = self.entrance_url)
-            
+            self.sitemap = {"!!": {"key": self.entrance_url}}
+        
         cycler = itertools.cycle(range(self.save_interval))
         for level, link_extractor in zip(list(range(len(self.link_extractor_list))), 
                                          self.link_extractor_list):
-            for node in self.sitemap.iterlevel(level):
-                if len(node) == 0: # 只有在等于0的时候才说明爬过了
-                    print("crawling %s" % node.key)
+            for key, node in DT.kv_level(self.sitemap, level):
+                if DT.length(node) == 0: # 只有在等于0的时候才说明没爬过
+                    print("crawling %s" % key)
                     try:
-                        tryit(self.try_howmany, self._update_node, node, link_extractor) # 尝试爬若干次
-                        self.spider.pm.update_health(1) # 如果成功，更新代理的健康度
+                        tryit(self.try_howmany, self._update_node, key, node, link_extractor) # 尝试爬若干次
+                        if self.spider.using_proxy:
+                            self.spider.pm.update_health(1) # 如果成功，更新代理的健康度
                         # 检查循环计数器，说明已经成功解析过了#save_interval个url
                         # 则需要将文件dump到本地进行保存
-                        if next(cycler) == (self.save_interval - 1): 
-                            self.sitemap.dump(self.local_file, replace = True)
+                        if next(cycler) == (self.save_interval - 1):
+                            safe_dump_pk(self.sitemap, self.local_file)
                             if self.spider.using_proxy:
                                 self.spider.pm.dump_pxy()
                     except Exception as e:
-                        self.log.write(e, node.key)
-                        
+                        if self.spider.using_proxy:
+                            self.log.write(e, "key=%s, proxy=%s" % (key, self.spider.pm.current_proxy))
+                        else:
+                            self.log.write(e, "key=%s" % (key,))
         ## 结束了
-        self.sitemap.dump(self.local_file, replace = True)
+        safe_dump_pk(self.sitemap, self.local_file)
         if self.spider.using_proxy:
             self.spider.pm.dump_pxy()
             

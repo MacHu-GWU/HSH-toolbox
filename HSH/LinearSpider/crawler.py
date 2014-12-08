@@ -29,18 +29,41 @@ if is_py2:
     eval("sys.setdefaultencoding('utf-8')")
 
 class Crawler(object):
-    """Simple http Crawler class
+    """Advanced http crawler class
     """
     def __init__(self):
-        self.user_agents = ["Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
-                            "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
-                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6",
-                            "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11, (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11"]
+        self.user_agents = ["Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36", #Chrome 41.0.2228.0
+                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36", #Chrome 37.0.2062.124
+                            "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36", #Chrome 29.0.1547.62
+                            
+                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; rv:33.0) Gecko/20100101 Firefox/33.0", #Firefox 33.0
+                            "Mozilla/5.0 (X11; Linux i586; rv:31.0) Gecko/20100101 Firefox/31.0", #Firefox 31.0
+                            "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:29.0) Gecko/20120101 Firefox/29.0", #Firefox 29.0
+                            
+                            "Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/20121202 Firefox/17.0 Iceweasel/17.0.1", #Iceweasel 17.0.1
+                            "Mozilla/5.0 (X11; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1 Iceweasel/15.0.1", #Iceweasel 15.0.1
+                            "Mozilla/5.0 (X11; debian; Linux x86_64; rv:15.0) Gecko/20100101 Iceweasel/15.0", #Iceweasel 15.0
+                            
+                            "Mozilla/5.0 (compatible, MSIE 11, Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko", #Internet Explorer 11.0
+                            "Mozilla/5.0 (compatible; MSIE 10.6; Windows NT 6.1; Trident/5.0; InfoPath.2; SLCC1; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727) 3gpp-gba UNTRUSTED/1.0", #Internet Explorer 10.6
+                            "Mozilla/5.0 (compatible; MSIE 10.0; Macintosh; Intel Mac OS X 10_7_3; Trident/6.0)", #Internet Explorer 10.0
+                            "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US)", #Internet Explorer 9.0
+                            
+                            "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.1 (KHTML, like Gecko) Maxthon/3.0.8.2 Safari/533.1", #Maxthon 3.0.8.2
+                            "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/532.4 (KHTML, like Gecko) Maxthon/3.0.6.27 Safari/532.4", #Maxthon 3.0.6.27
+                            "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; Maxthon/3.0)", #Maxthon 3.0
+                            "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/4.0; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; Zune 4.0; InfoPath.3; MS-RTC LM 8; .NET4.0C; .NET4.0E; Maxthon 2.0)", #Maxthon 2.0
+                            
+                            "Mozilla/5.0 (Windows; U; Win 9x 4.90; SG; rv:1.9.2.4) Gecko/20101104 Netscape/9.1.0285", #Netscape 9.1.0285
+                            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en-US; rv:1.8.1.8pre) Gecko/20071001 Firefox/2.0.0.7 Navigator/9.0RC1", #Netscape 9.0RC1
+                            "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.12) Gecko/20080219 Firefox/2.0.0.12 Navigator/9.0.0.6", #Netscape 9.0.0.6
+                            ]
+        
         self.default_header = {"Accept":"text/html;q=0.9,*/*;q=0.8",
-                                "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.3",
-                                "Accept-Encoding":"gzip",
-                                "Connection":"close",
-                                "Referer": None}
+                               "Accept-Charset":"ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+                               "Accept-Encoding":"gzip",
+                               "Connection":"close",
+                               "Referer": None}
         self.auth = None # initialize the self.auth. Then if there"s no login, Crawler.html can work in regular mode
         self.using_proxy = 0
     
@@ -58,15 +81,10 @@ class Crawler(object):
         """
         self.default_header["Referer"] = url
     
-    def enable_proxy(self, maximum_num_of_proxy = 10):
+    def enable_proxy(self, proxymanager):
         """Activate proxy"""
-        try:
-            self.pm # <== 如果之前enable过了，就无需重新创建了
-            self.using_proxy = 1 # <== 仅仅修改flag即可
-        except:
-            self.pm = ProxyManager(maximum_num_of_proxy)
-            self.pm._equip_proxy()
-            self.using_proxy = 1 # set using proxy flag = True
+        self.pm = proxymanager
+        self.using_proxy = 1
     
     def disable_proxy(self):
         """disable proxy"""
@@ -162,7 +180,7 @@ class Crawler(object):
                 return None # if failed, return none
     
     def html(self, url, timeout = 6, lock_proxy = False, enable_verbose = False):
-        """universal method"""
+        """universal method for self.html_with_proxy or self.html_without_proxy"""
         if self.using_proxy:
             return self.html_WITH_proxy(url, timeout, lock_proxy, enable_verbose)
         else:
@@ -212,22 +230,23 @@ class ProxyManager(object):
         每个代理有三个属性: 成功次数，尝试次数，健康度
         每次使用代理，如果成功，则成功次数和尝试次数+1
         每次使用代理，如果失败，则成功次数和尝试次数+1
-        健康度在尝试次数小于5次时都是1.0，如果尝试次数多于五次，则健康度 = 成功次数/尝试次数
+        健康度在尝试次数小于5次时都是1.0，如果尝试次数多于5次，则健康度 = 成功次数/尝试次数
     
     代理管理器主要有如下几个功能：
-        1. 从健康度较高的代理中随机选取一个代理使用
+        1. 从健康度较高的代理中随机选取一个代理使用。（高于0.75）
         2. 根据上一次代理使用的
     """
-    def __init__(self, maximum_num_of_proxy = 10):
-        self.maximum_num_of_proxy = maximum_num_of_proxy
-        self._equip_proxy()
+    def __init__(self):
         self.current_proxy = None
         self.file_path = "proxy.txt"
         
     def __str__(self):
-        return str(self.proxy)
-    
-    def _equip_proxy(self):
+        try:
+            return str(self.proxy)
+        except:
+            return "No available Proxy"
+        
+    def download_proxy(self, maximum_num_of_proxy = 10):
         """
         [EN]load latest availble proxy from www.us-proxy.org
         There are 3 levels of proxies according to their anonymity.
@@ -255,7 +274,7 @@ class ProxyManager(object):
             if anonymity == "elite proxy": # default only use elite proxy
                 ips.append("http://%s:%s" % (ip, port))
                 res.append([0.0, 0.0, 1.0])
-                if len(res) >= self.maximum_num_of_proxy: # if got enough useful proxy, then step out
+                if len(res) >= maximum_num_of_proxy: # if got enough useful proxy, then step out
                     break
         
         self.proxy = pd.DataFrame(res, index = ips, columns = ["success", "tried", "health"])
@@ -267,12 +286,22 @@ class ProxyManager(object):
     def load_pxy(self, replace = False):
         """load proxy data from local file and merge with current using proxy"""
         df = pd.read_csv(self.file_path, sep="\t", header = 0, index_col = 0)
-        if replace: # if in replace mode, dump current, overwrite with loaded
+        if replace: # if in replace mode, dump current, overwrite with loaded anyway
             self.proxy = df
         else: # if not in replace mode, merge current and loaded
-            for row_ind, row in df.iterrows():
-                self.proxy.loc[row_ind, :] = row
-
+            try:
+                for row_ind, row in df.iterrows():
+                    self.proxy.loc[row_ind, :] = row
+            except:
+                self.proxy = df
+                
+    def reset_health(self):
+        """reset currently using proxy ip to fresh new
+        success = 0.0, tried = 0.0, health = 1.0
+        """
+        self.proxy[["success", "tried"]] = 0.0
+        self.proxy["health"] = 1.0
+    
     def generate_one(self):
         """randomly choose a proxy with health greater than 0.75
         """
@@ -297,4 +326,118 @@ class ProxyManager(object):
             self.proxy.loc[ip, "tried"] += 1.0
             if self.proxy.loc[ip, "tried"] >= 5: # if tried more than 10 times, then we keep update successful rate
                 self.proxy.loc[ip, "health"] = float(self.proxy.loc[ip, "success"])/self.proxy.loc[ip, "tried"]
+
+if __name__ == "__main__":
+    class ProxyManager_unittest():
+        @staticmethod
+        def download_proxy():
+            pm = ProxyManager()
+            print(pm)
+            pm.download_proxy() # see if successfully get latest available proxy from www.us-proxy.org
+            print(pm)
+        
+        @staticmethod
+        def dump_pxy():
+            print("{:=^100}".format("dump_pxy"))
+            pm = ProxyManager()
+            pm.download_proxy()
+            pm.dump_pxy()
+            
+        @staticmethod
+        def load_pxy():
+            print("{:=^100}".format("load_pxy"))
+            pm = ProxyManager()
+            print("{:=^60}".format("before"))
+            print(pm)
+            pm.load_pxy()
+            print("{:=^60}".format("after"))
+            print(pm)
+            
+        @staticmethod
+        def reset_health():
+            print("{:=^100}".format("load_pxy"))
+            pm = ProxyManager()
+            pm.load_pxy()
+            print("{:=^60}".format("before"))
+            print(pm)
+            pm.reset_health()
+            print("{:=^60}".format("after"))
+            print(pm)
+            
+        @staticmethod
+        def generate_one():
+            pm = ProxyManager()
+            pm.download_proxy()
+            for i in range(10):
+                print(pm.generate_one()) # sample proxies = {"http": "http://10.10.1.10:3128", "https": "http://10.10.1.10:1080",}
+                print("\tcurrently using:", pm.current_proxy) # see if proxy manager saved the most recent proxy to self.current_proxy
+        
+        @staticmethod
+        def update_health():
+            pm = ProxyManager()
+            pm._equip_proxy()
+            try:
+                pm.update_health(1)
+            except Exception as e:
+                print(e)
                 
+            print(pm.generate_one())
+            pm.update_health(1)
+            print(pm)
+
+
+    class Crawler_unittest():
+        @staticmethod
+        def set_referer():
+            print("{:=^100}".format("set_referer"))
+            spider = Crawler()
+            print(spider)
+            spider.set_referer("https://www.python.org/")
+            print(spider)
+            
+        @staticmethod
+        def enable_proxy():
+            print("{:=^100}".format("enable_proxy"))
+            spider = Crawler()
+            pm = ProxyManager()
+            pm.download_proxy()
+            spider.enable_proxy(pm)
+            print(spider)
+            
+        @staticmethod
+        def html_WITHOUt_proxy():
+            """test normal http request"""
+            url = "http://docs.python-requests.org/"
+            spider = Crawler()
+            html = spider.html(url)
+            print(BS4(html).prettify())
+            
+        @staticmethod
+        def html_WITH_proxy():
+            """test random proxy mechanism"""
+            url = "http://docs.python-requests.org/"
+            spider = Crawler()
+            pm = ProxyManager()
+            pm.download_proxy()
+            spider.enable_proxy(pm)
+            for i in range(10):
+                html = spider.html(url)
+                print(i, spider.pm.current_proxy)
+                if html:
+                    print("\tSUCCESS")
+                    spider.pm.update_health(1)
+                else:
+                    print("\tFAILED")
+            print(spider)
+
+#     ProxyManager_unittest.download_proxy()
+#     ProxyManager_unittest.dump_pxy()
+#     ProxyManager_unittest.load_pxy()
+#     ProxyManager_unittest.clear_health()
+#     ProxyManager_unittest.generate_one()
+#     ProxyManager_unittest.update_health()
+
+#     Crawler_unittest.set_referer()
+#     Crawler_unittest.enable_proxy()
+#     Crawler_unittest.html_WITHOUt_proxy()
+#     Crawler_unittest.html_WITH_proxy()

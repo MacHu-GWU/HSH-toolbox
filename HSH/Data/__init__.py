@@ -10,6 +10,7 @@
 #                                #
 ##################################
 
+from .dicttree import DictTree
 from .dtype import DtypeConverter, OrderedSet, SuperSet
 from .excel2db import excel2sqlite
 from .hashutil import md5_str, md5_obj, md5_file, hash_obj

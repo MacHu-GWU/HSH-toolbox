@@ -111,11 +111,11 @@ def safe_dump_js(js, fname, fastmode = False, enable_verbose = True):
     dump_js(js, temp_fname, fastmode = fastmode, replace = True, enable_verbose = enable_verbose)
     shutil.move(temp_fname, fname)
 
-def prt_js(js):
+def prt_js(js, sort_keys=True):
     """print dict object with pretty format"""
-    print(json.dumps(js, sort_keys=True, indent=4, separators=("," , ": ")) )
+    print(json.dumps(js, sort_keys=sort_keys, indent=4, separators=("," , ": ")) )
     
-def js2str(js):
+def js2str(js, sort_keys=True):
     """encode js to human readable string"""
-    return json.dumps(js, sort_keys=True, indent=4, separators=("," , ": "))
+    return json.dumps(js, sort_keys=sort_keys, indent=4, separators=("," , ": "))
 

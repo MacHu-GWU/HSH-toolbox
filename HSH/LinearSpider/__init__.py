@@ -20,7 +20,9 @@
 from __future__ import print_function
 try:
     from .scheduler import Scheduler
-    from .crawler import Crawler
+    from .crawler import Crawler, ProxyManager
+    from .js import load_js, dump_js, safe_dump_js, prt_js, js2str
+    from .pk import load_pk, dump_pk, safe_dump_pk, obj2str, str2obj
 except:
     pass
 
