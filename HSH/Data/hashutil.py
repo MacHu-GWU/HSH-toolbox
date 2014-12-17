@@ -19,7 +19,7 @@ This module is re-pack of some hashlib utility functions
 compatible: python2 and python3
 
 usage:
-    from HSH.Data.hsh_hashlib import md5_str, md5_obj, md5_file, hash_obj
+    from HSH.Data.hashutil import md5_str, md5_obj, md5_file, hash_obj
 """
 
 from __future__ import print_function
