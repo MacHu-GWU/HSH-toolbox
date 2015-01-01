@@ -21,7 +21,7 @@ compatibility: python2 and python3
 prerequisites: None
 
 import:
-    from HSH.Data.js import load_js, dump_js, prt_js
+    from HSH.Data.js import load_js, dump_js, safe_dump_js, prt_js, js2str
 """
 
 from __future__ import print_function

@@ -206,7 +206,7 @@ if __name__ == "__main__":
     def UT4():
         """test str2datetime
         """
-        print("{:=^40}".format("UT3"))
+        print("{:=^40}".format("UT4"))
         timewrapper = TimeWrapper()
         
         todo = ["2014-01-15 06:30:12", "2014-01-20T03:11:43", "2014-03-20 23:47:50Z003"]

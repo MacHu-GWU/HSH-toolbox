@@ -18,7 +18,7 @@ This module is re-pack of some pickle utility functions
 compatible: python2 and python3
 
 import:
-    from HSH.Data.pk import load_pk, dump_pk, obj2str, str2obj
+    from HSH.Data.pk import load_pk, dump_pk, safe_dump_pk, obj2str, str2obj
 """
 
 from __future__ import print_function
